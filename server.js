@@ -6,24 +6,20 @@ var express = require('express');
 var app = express();
 
 app.get("/api/timestamp/", (req, res) => {
-  res.json({ unix: Date.now(), utx: Date() })
+  let resDate = new Date();
+  res.json({ unix: resDate.valueOf(), utx: resDate.toUTCString() })
 });
 
-app.get("/api/timestamp/:date_string", (req, res) => {
-  let dateString = req.params.date_string;
-  if (/\d{5,}/.test(dateString)) {
-    const dateInt = parseInt(dateString);
-    res.json({ unix: dateInt, utc: new Date(dateInt).toUTCString() })
+app.get("/api/timestamp/:date_string?", (req, res) => {
+  let reqString = req.params.date_string;
+  let resDate;
+  if (!/^\d{4}-/.test(reqString)) {
+    resDate = new Date(parseInt(reqString));
   }
-  else {
-    let dateObject = new Date(dateString);
-    if (dateObject.toString() === "Invalid Date") {
-      res.json({ error: "Invalid Date"})
-    }
-    else {
-      res.json({ unix: dateObject.valueOf(), utc: dateObject.toUTCString() })
-    }
+  if (resDate.getTime() !== resDate.getTime()) {
+    res.json({ error: "Invalid Date"});
   }
+  res.json({ unix: resDate.valueOf(), utc: resDate.toUTCString})
 });
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
